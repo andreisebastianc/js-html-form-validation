@@ -110,6 +110,39 @@ input:focus {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+/* CSS Pseudo-classes for validation (modern approach) */
+/* Using :user-invalid and :user-valid for better UX - only shows after user interaction */
+input:user-valid {
+    border-color: var(--success-color);
+}
+
+input:user-valid:focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+input:user-invalid {
+    border-color: var(--error-color);
+}
+
+input:user-invalid:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Fallback for older browsers that don't support :user-invalid/:user-valid */
+/* These will show immediately, but are overridden by :user-* in modern browsers */
+input:valid:not(:placeholder-shown) {
+    border-color: var(--success-color);
+}
+
+input:valid:not(:placeholder-shown):focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+input:invalid:not(:placeholder-shown):not(:focus) {
+    border-color: var(--error-color);
+}
+
+/* JavaScript-based classes (for custom validation logic) */
 input.valid {
     border-color: var(--success-color);
 }
@@ -295,7 +328,9 @@ button[type="button"]:hover {
     }
 }
 
-input.valid {
+/* Apply success animation to valid inputs */
+input.valid,
+input:user-valid {
     animation: successPulse 0.6s;
 }
 
@@ -312,6 +347,8 @@ input.valid {
     }
 }
 
-input.invalid {
+/* Apply error animation to invalid inputs */
+input.invalid,
+input:user-invalid {
     animation: shake 0.5s;
 }
