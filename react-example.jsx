@@ -108,23 +108,40 @@ export function useFormValidation() {
     const newErrors = [];
 
     inputs.forEach(input => {
+      // Ensure input has an ID for linking
+      if (!input.id) {
+        input.id = input.name || `input-${Math.random().toString(36).substr(2, 9)}`;
+      }
+
       // Use native checkValidity() method
       if (!input.checkValidity()) {
+        const errorMessage = getValidationMessage(input);
+
         newErrors.push({
           field: input.name || input.id,
-          message: getValidationMessage(input),
+          inputId: input.id,
+          message: errorMessage,
           input: input // Keep reference for focus management
         });
+
+        // Show inline error message
+        const formGroup = input.closest('.form-group');
+        const errorElement = formGroup?.querySelector('.error-message');
+        if (errorElement) {
+          errorElement.textContent = errorMessage;
+        }
+      } else {
+        // Clear inline error message
+        const formGroup = input.closest('.form-group');
+        const errorElement = formGroup?.querySelector('.error-message');
+        if (errorElement) {
+          errorElement.textContent = '';
+        }
       }
     });
 
     setErrors(newErrors);
     setIsValidating(false);
-
-    // Focus first invalid input
-    if (newErrors.length > 0 && newErrors[0].input) {
-      newErrors[0].input.focus();
-    }
 
     return newErrors.length === 0;
   }, []);
@@ -191,6 +208,21 @@ export function useFormValidation() {
 function ErrorSummary({ errors }) {
   if (errors.length === 0) return null;
 
+  const handleErrorClick = (e, inputId) => {
+    e.preventDefault();
+    const input = document.getElementById(inputId);
+
+    if (input) {
+      // Scroll input into view
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Focus the input
+      setTimeout(() => {
+        input.focus();
+      }, 300); // Wait for scroll to complete
+    }
+  };
+
   return (
     <div className="error-summary" role="alert" aria-live="polite">
       <h3>
@@ -199,7 +231,13 @@ function ErrorSummary({ errors }) {
       <ul>
         {errors.map((error, index) => (
           <li key={`${error.field}-${index}`}>
-            {error.message}
+            <a
+              href={`#${error.inputId}`}
+              className="error-link"
+              onClick={(e) => handleErrorClick(e, error.inputId)}
+            >
+              {error.message}
+            </a>
           </li>
         ))}
       </ul>
@@ -242,6 +280,7 @@ export function BasicForm() {
           aria-label="Email"
           required
         />
+        <span className="error-message"></span>
       </div>
 
       <div className="form-group">
@@ -257,6 +296,7 @@ export function BasicForm() {
           pattern="[a-zA-Z0-9]+"
           title="Only letters and numbers allowed"
         />
+        <span className="error-message"></span>
       </div>
 
       <div className="form-group">
@@ -270,6 +310,7 @@ export function BasicForm() {
           min={18}
           max={120}
         />
+        <span className="error-message"></span>
       </div>
 
       <button type="submit">Submit</button>
@@ -325,6 +366,7 @@ export function PasswordForm() {
           aria-label="Email"
           required
         />
+        <span className="error-message"></span>
       </div>
 
       <div className="form-group">
@@ -339,6 +381,7 @@ export function PasswordForm() {
           minLength={8}
           onChange={validatePasswordMatch}
         />
+        <span className="error-message"></span>
       </div>
 
       <div className="form-group">
@@ -352,6 +395,7 @@ export function PasswordForm() {
           required
           onChange={validatePasswordMatch}
         />
+        <span className="error-message"></span>
       </div>
 
       <button type="submit">Submit</button>
@@ -395,6 +439,7 @@ export function RealtimeValidationForm() {
           required
           onBlur={handleBlur}
         />
+        <span className="error-message"></span>
       </div>
 
       <div className="form-group">
@@ -410,6 +455,7 @@ export function RealtimeValidationForm() {
           placeholder="(123) 456-7890"
           onBlur={handleBlur}
         />
+        <span className="error-message"></span>
       </div>
 
       <div className="form-group">
@@ -422,6 +468,7 @@ export function RealtimeValidationForm() {
           placeholder="https://example.com"
           onBlur={handleBlur}
         />
+        <span className="error-message"></span>
       </div>
 
       <button type="submit">Submit</button>

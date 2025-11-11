@@ -67,15 +67,36 @@ function collectFormErrors(form) {
     const inputs = form.querySelectorAll('input, select, textarea');
 
     inputs.forEach(input => {
+        const formGroup = input.closest('.form-group');
+        const errorElement = formGroup?.querySelector('.error-message');
+
         if (!input.checkValidity()) {
             const errorMessage = getValidationMessage(input);
+
+            // Ensure input has an ID for linking
+            if (!input.id) {
+                input.id = input.name || `input-${Math.random().toString(36).substr(2, 9)}`;
+            }
+
             errors.push({
                 input: input,
+                inputId: input.id,
                 message: errorMessage
             });
+
+            // Show inline error message
+            if (errorElement) {
+                errorElement.textContent = errorMessage;
+            }
+
             input.classList.add('invalid');
             input.classList.remove('valid');
         } else {
+            // Clear inline error message
+            if (errorElement) {
+                errorElement.textContent = '';
+            }
+
             input.classList.remove('invalid');
             if (input.value) {
                 input.classList.add('valid');
@@ -103,14 +124,34 @@ function displayErrorSummary(form, errors) {
 
     let html = `<h3>Please fix the following ${errorCount} error${pluralSuffix}:</h3><ul>`;
 
-    errors.forEach(error => {
-        html += `<li>${error.message}</li>`;
+    errors.forEach((error, index) => {
+        // Create clickable link to the input using its ID
+        html += `<li><a href="#${error.inputId}" class="error-link" data-input-id="${error.inputId}">${error.message}</a></li>`;
     });
 
     html += '</ul>';
 
     errorSummary.innerHTML = html;
     errorSummary.style.display = 'block';
+
+    // Add click handlers to error links
+    errorSummary.querySelectorAll('.error-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const inputId = this.getAttribute('data-input-id');
+            const input = document.getElementById(inputId);
+
+            if (input) {
+                // Scroll input into view
+                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Focus the input
+                setTimeout(() => {
+                    input.focus();
+                }, 300); // Wait for scroll to complete
+            }
+        });
+    });
 
     // Scroll to error summary
     errorSummary.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -129,6 +170,13 @@ function clearFormErrors(form) {
     const inputs = form.querySelectorAll('input, select, textarea');
     inputs.forEach(input => {
         input.classList.remove('invalid', 'valid');
+
+        // Clear inline error message
+        const formGroup = input.closest('.form-group');
+        const errorElement = formGroup?.querySelector('.error-message');
+        if (errorElement) {
+            errorElement.textContent = '';
+        }
     });
 }
 

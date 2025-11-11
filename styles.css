@@ -159,12 +159,17 @@ input.invalid:focus {
     box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
-/* Error Messages */
+/* Error Messages - Inline (below each input) */
 .error-message {
-    display: none;
+    display: block;
     color: var(--error-color);
     font-size: 0.875em;
     margin-top: 5px;
+    min-height: 1.2em; /* Reserve space to prevent layout shift */
+}
+
+.error-message:empty {
+    display: none;
 }
 
 /* Error Summary */
@@ -201,6 +206,23 @@ input.invalid:focus {
     content: "•";
     margin-right: 8px;
     font-weight: bold;
+}
+
+.error-summary a {
+    color: var(--error-color);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.error-summary a:hover {
+    color: #dc2626;
+    text-decoration: none;
+}
+
+.error-summary a:focus {
+    outline: 2px solid var(--error-color);
+    outline-offset: 2px;
+    border-radius: 2px;
 }
 
 /* Validity State Display */
