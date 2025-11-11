@@ -87,12 +87,33 @@ function collectFormErrors(formElement) {
   const errors = [];
 
   inputs.forEach(input => {
+    const formGroup = input.closest('.form-group');
+    const errorElement = formGroup?.querySelector('.error-message');
+
+    // Ensure input has an ID for linking
+    if (!input.id) {
+      input.id = input.name || `input-${Math.random().toString(36).substr(2, 9)}`;
+    }
+
     if (!input.checkValidity()) {
+      const errorMessage = getValidationMessage(input);
+
       errors.push({
         field: input.name || input.id,
-        message: getValidationMessage(input),
+        inputId: input.id,
+        message: errorMessage,
         input: input
       });
+
+      // Show inline error message
+      if (errorElement) {
+        errorElement.textContent = errorMessage;
+      }
+    } else {
+      // Clear inline error message
+      if (errorElement) {
+        errorElement.textContent = '';
+      }
     }
   });
 
@@ -118,6 +139,22 @@ export class ErrorSummaryComponent extends Component {
   get pluralSuffix() {
     return this.errorCount === 1 ? '' : 's';
   }
+
+  @action
+  handleErrorClick(event, inputId) {
+    event.preventDefault();
+    const input = document.getElementById(inputId);
+
+    if (input) {
+      // Scroll input into view
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Focus the input
+      setTimeout(() => {
+        input.focus();
+      }, 300); // Wait for scroll to complete
+    }
+  }
 }
 
 // app/components/error-summary.hbs
@@ -129,7 +166,15 @@ const ErrorSummaryTemplate = `
     </h3>
     <ul>
       {{#each @errors as |error|}}
-        <li>{{error.message}}</li>
+        <li>
+          <a
+            href="#{{error.inputId}}"
+            class="error-link"
+            {{on "click" (fn this.handleErrorClick error.inputId)}}
+          >
+            {{error.message}}
+          </a>
+        </li>
       {{/each}}
     </ul>
   </div>
@@ -186,6 +231,7 @@ const RegistrationFormTemplate = `
       aria-label="Email"
       required={{true}}
     />
+    <span class="error-message"></span>
   </div>
 
   <div class="form-group">
@@ -201,6 +247,7 @@ const RegistrationFormTemplate = `
       pattern="[a-zA-Z0-9]+"
       title="Only alphanumeric characters allowed"
     />
+    <span class="error-message"></span>
   </div>
 
   <div class="form-group">
@@ -214,6 +261,7 @@ const RegistrationFormTemplate = `
       min="18"
       max="120"
     />
+    <span class="error-message"></span>
   </div>
 
   <button type="submit">Submit</button>
@@ -292,6 +340,7 @@ const PasswordFormTemplate = `
       aria-label="Email"
       required={{true}}
     />
+    <span class="error-message"></span>
   </div>
 
   <div class="form-group">
@@ -306,6 +355,7 @@ const PasswordFormTemplate = `
       {{did-insert this.registerPassword}}
       {{on "input" this.validatePasswordMatch}}
     />
+    <span class="error-message"></span>
   </div>
 
   <div class="form-group">
@@ -319,6 +369,7 @@ const PasswordFormTemplate = `
       {{did-insert this.registerConfirm}}
       {{on "input" this.validatePasswordMatch}}
     />
+    <span class="error-message"></span>
   </div>
 
   <button type="submit">Submit</button>
@@ -391,6 +442,7 @@ const RealtimeFormTemplate = `
       required={{true}}
       {{on "blur" this.validateField}}
     />
+    <span class="error-message"></span>
   </div>
 
   <div class="form-group">
@@ -406,6 +458,7 @@ const RealtimeFormTemplate = `
       placeholder="(123) 456-7890"
       {{on "blur" this.validateField}}
     />
+    <span class="error-message"></span>
   </div>
 
   <div class="form-group">
@@ -418,6 +471,7 @@ const RealtimeFormTemplate = `
       placeholder="https://example.com"
       {{on "blur" this.validateField}}
     />
+    <span class="error-message"></span>
   </div>
 
   <button type="submit">Submit</button>
