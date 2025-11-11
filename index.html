@@ -17,6 +17,8 @@
             <p>Using built-in HTML5 attributes: <code>required</code>, <code>pattern</code>, <code>minlength</code>, <code>type</code>, etc.</p>
 
             <form id="form1" class="validation-form" novalidate>
+                <div class="error-summary" style="display: none;"></div>
+
                 <div class="form-group">
                     <label for="email1">Email (required):</label>
                     <input type="email" id="email1" name="email" required>
@@ -58,6 +60,8 @@
             <p>Using JavaScript methods: <code>checkValidity()</code>, <code>setCustomValidity()</code>, <code>validity</code> object</p>
 
             <form id="form2" class="validation-form" novalidate>
+                <div class="error-summary" style="display: none;"></div>
+
                 <div class="form-group">
                     <label for="email2">Email:</label>
                     <input type="email" id="email2" name="email" required>
@@ -92,6 +96,8 @@
             <p>Implementing custom validation rules with <code>setCustomValidity()</code></p>
 
             <form id="form3" class="validation-form" novalidate>
+                <div class="error-summary" style="display: none;"></div>
+
                 <div class="form-group">
                     <label for="username3">Username (no special chars except underscore):</label>
                     <input type="text" id="username3" name="username" required>
@@ -132,6 +138,8 @@
             <p>Validating on input, blur, and submit events</p>
 
             <form id="form4" class="validation-form" novalidate>
+                <div class="error-summary" style="display: none;"></div>
+
                 <div class="form-group">
                     <label for="email4">Email (validated on blur):</label>
                     <input type="email" id="email4" name="email" required>
@@ -156,12 +164,14 @@
             </form>
         </section>
 
-        <!-- Example 5: reportValidity() Demo -->
+        <!-- Example 5: ValidityState Error Summary Demo -->
         <section class="example">
-            <h2>5. reportValidity() Method</h2>
-            <p>Using <code>reportValidity()</code> to show native browser validation messages</p>
+            <h2>5. ValidityState with Error Summary</h2>
+            <p>Using <code>ValidityState</code> to collect all errors and display them in a summary at the top of the form</p>
 
-            <form id="form5" class="validation-form">
+            <form id="form5" class="validation-form" novalidate>
+                <div class="error-summary" style="display: none;"></div>
+
                 <div class="form-group">
                     <label for="name5">Name:</label>
                     <input type="text" id="name5" name="name" required>
@@ -172,8 +182,8 @@
                     <input type="email" id="email5" name="email" required>
                 </div>
 
-                <button type="submit">Submit (Native Messages)</button>
-                <button type="button" id="reportValidityBtn">Check & Report Validity</button>
+                <button type="submit">Submit Form 5</button>
+                <button type="button" id="reportValidityBtn">Check Validity & Show Errors</button>
             </form>
         </section>
 

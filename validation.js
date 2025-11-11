@@ -1,29 +1,7 @@
 // ============================================================================
 // HTML Form Validation - Browser APIs Exploration
+// Using ValidityState with Error Summary at Top of Form
 // ============================================================================
-
-// Utility function to display error messages
-function showError(input, message) {
-    const formGroup = input.closest('.form-group');
-    const errorElement = formGroup.querySelector('.error-message');
-    errorElement.textContent = message;
-    errorElement.style.display = 'block';
-    input.classList.add('invalid');
-    input.classList.remove('valid');
-}
-
-function clearError(input) {
-    const formGroup = input.closest('.form-group');
-    const errorElement = formGroup.querySelector('.error-message');
-    errorElement.textContent = '';
-    errorElement.style.display = 'none';
-    input.classList.remove('invalid');
-    if (input.value) {
-        input.classList.add('valid');
-    } else {
-        input.classList.remove('valid');
-    }
-}
 
 // Get custom error message based on ValidityState
 function getValidationMessage(input) {
@@ -34,44 +12,141 @@ function getValidationMessage(input) {
     }
 
     if (validity.valueMissing) {
-        return `${input.name || 'This field'} is required.`;
+        return `${getFieldLabel(input)} is required.`;
     }
 
     if (validity.typeMismatch) {
         if (input.type === 'email') {
-            return 'Please enter a valid email address.';
+            return `${getFieldLabel(input)}: Please enter a valid email address.`;
         }
         if (input.type === 'url') {
-            return 'Please enter a valid URL.';
+            return `${getFieldLabel(input)}: Please enter a valid URL.`;
         }
-        return 'Please match the requested format.';
+        return `${getFieldLabel(input)}: Please match the requested format.`;
     }
 
     if (validity.tooShort) {
-        return `Please enter at least ${input.minLength} characters (you entered ${input.value.length}).`;
+        return `${getFieldLabel(input)}: Please enter at least ${input.minLength} characters (you entered ${input.value.length}).`;
     }
 
     if (validity.tooLong) {
-        return `Please enter no more than ${input.maxLength} characters.`;
+        return `${getFieldLabel(input)}: Please enter no more than ${input.maxLength} characters.`;
     }
 
     if (validity.rangeUnderflow) {
-        return `Please enter a value greater than or equal to ${input.min}.`;
+        return `${getFieldLabel(input)}: Please enter a value greater than or equal to ${input.min}.`;
     }
 
     if (validity.rangeOverflow) {
-        return `Please enter a value less than or equal to ${input.max}.`;
+        return `${getFieldLabel(input)}: Please enter a value less than or equal to ${input.max}.`;
     }
 
     if (validity.patternMismatch) {
-        return input.title || 'Please match the requested format.';
+        return `${getFieldLabel(input)}: ${input.title || 'Please match the requested format.'}`;
     }
 
     if (validity.customError) {
-        return input.validationMessage;
+        return `${getFieldLabel(input)}: ${input.validationMessage}`;
     }
 
-    return input.validationMessage || 'Please enter a valid value.';
+    return `${getFieldLabel(input)}: ${input.validationMessage || 'Please enter a valid value.'}`;
+}
+
+// Get a friendly field label from the input
+function getFieldLabel(input) {
+    const label = input.closest('.form-group')?.querySelector('label');
+    if (label) {
+        return label.textContent.replace(/[:\(\)]/g, '').split('(')[0].trim();
+    }
+    return input.name || input.id || 'This field';
+}
+
+// Collect all validation errors from a form using ValidityState
+function collectFormErrors(form) {
+    const errors = [];
+    const inputs = form.querySelectorAll('input, select, textarea');
+
+    inputs.forEach(input => {
+        if (!input.checkValidity()) {
+            const errorMessage = getValidationMessage(input);
+            errors.push({
+                input: input,
+                message: errorMessage
+            });
+            input.classList.add('invalid');
+            input.classList.remove('valid');
+        } else {
+            input.classList.remove('invalid');
+            if (input.value) {
+                input.classList.add('valid');
+            } else {
+                input.classList.remove('valid');
+            }
+        }
+    });
+
+    return errors;
+}
+
+// Display error summary at the top of the form
+function displayErrorSummary(form, errors) {
+    const errorSummary = form.querySelector('.error-summary');
+
+    if (errors.length === 0) {
+        errorSummary.style.display = 'none';
+        errorSummary.innerHTML = '';
+        return;
+    }
+
+    const errorCount = errors.length;
+    const pluralSuffix = errorCount === 1 ? '' : 's';
+
+    let html = `<h3>Please fix the following ${errorCount} error${pluralSuffix}:</h3><ul>`;
+
+    errors.forEach(error => {
+        html += `<li>${error.message}</li>`;
+    });
+
+    html += '</ul>';
+
+    errorSummary.innerHTML = html;
+    errorSummary.style.display = 'block';
+
+    // Scroll to error summary
+    errorSummary.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Validate form and display errors in summary
+function validateForm(form) {
+    const errors = collectFormErrors(form);
+    displayErrorSummary(form, errors);
+    return errors.length === 0;
+}
+
+// Clear all errors from a form
+function clearFormErrors(form) {
+    displayErrorSummary(form, []);
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.classList.remove('invalid', 'valid');
+    });
+}
+
+// Legacy functions for compatibility (now redirect to error summary approach)
+function showError(input, message) {
+    // Mark field as invalid
+    input.classList.add('invalid');
+    input.classList.remove('valid');
+}
+
+function clearError(input) {
+    // Mark field as valid if it has value
+    input.classList.remove('invalid');
+    if (input.value) {
+        input.classList.add('valid');
+    } else {
+        input.classList.remove('valid');
+    }
 }
 
 // ============================================================================
@@ -82,21 +157,10 @@ const form1 = document.getElementById('form1');
 form1.addEventListener('submit', function(event) {
     event.preventDefault();
 
-    let isValid = true;
-    const inputs = form1.querySelectorAll('input');
-
-    inputs.forEach(input => {
-        if (!input.checkValidity()) {
-            showError(input, getValidationMessage(input));
-            isValid = false;
-        } else {
-            clearError(input);
-        }
-    });
-
-    if (isValid) {
+    if (validateForm(form1)) {
         console.log('Form 1 is valid!', new FormData(form1));
         alert('Form 1 submitted successfully! Check console for data.');
+        clearFormErrors(form1);
     } else {
         console.log('Form 1 has validation errors');
     }
@@ -149,21 +213,10 @@ form2.addEventListener('submit', function(event) {
 
     validatePasswordMatch();
 
-    let isValid = true;
-    const inputs = form2.querySelectorAll('input');
-
-    inputs.forEach(input => {
-        if (!input.checkValidity()) {
-            showError(input, getValidationMessage(input));
-            isValid = false;
-        } else {
-            clearError(input);
-        }
-    });
-
-    if (isValid) {
+    if (validateForm(form2)) {
         console.log('Form 2 is valid!', new FormData(form2));
         alert('Form 2 submitted successfully! Check console for data.');
+        clearFormErrors(form2);
     }
 });
 
@@ -335,24 +388,16 @@ zipCode3.addEventListener('input', function() {
 form3.addEventListener('submit', function(event) {
     event.preventDefault();
 
-    let isValid = true;
+    // Trigger validation on all inputs
     const inputs = form3.querySelectorAll('input');
-
     inputs.forEach(input => {
-        // Trigger validation
         input.dispatchEvent(new Event('input'));
-
-        if (!input.checkValidity()) {
-            showError(input, getValidationMessage(input));
-            isValid = false;
-        } else {
-            clearError(input);
-        }
     });
 
-    if (isValid) {
+    if (validateForm(form3)) {
         console.log('Form 3 is valid!', new FormData(form3));
         alert('Form 3 submitted successfully! Check console for data.');
+        clearFormErrors(form3);
     }
 });
 
@@ -493,58 +538,48 @@ coupon4.addEventListener('input', function() {
 form4.addEventListener('submit', function(event) {
     event.preventDefault();
 
-    let isValid = true;
-    const inputs = form4.querySelectorAll('input');
-
-    inputs.forEach(input => {
-        if (!input.checkValidity()) {
-            showError(input, getValidationMessage(input));
-            isValid = false;
-        } else if (input !== coupon4) {
-            clearError(input);
-        }
-    });
-
-    if (isValid) {
+    if (validateForm(form4)) {
         console.log('Form 4 is valid!', new FormData(form4));
         alert('Form 4 submitted successfully! Check console for data.');
+        clearFormErrors(form4);
     }
 });
 
 // ============================================================================
-// Example 5: reportValidity() Demo
+// Example 5: ValidityState Error Summary Demo
 // ============================================================================
 const form5 = document.getElementById('form5');
 
 form5.addEventListener('submit', function(event) {
     event.preventDefault();
 
-    // reportValidity() returns true if valid, false if invalid
-    // It also triggers the native browser validation UI
-    if (this.checkValidity()) {
+    if (validateForm(form5)) {
         console.log('Form 5 is valid!', new FormData(form5));
         alert('Form 5 submitted successfully! Check console for data.');
-    } else {
-        this.reportValidity();
+        clearFormErrors(form5);
     }
 });
 
 document.getElementById('reportValidityBtn').addEventListener('click', function() {
-    // reportValidity() shows native validation messages for all invalid fields
-    const isValid = form5.reportValidity();
+    // Check validity and show error summary instead of native browser tooltips
+    const isValid = validateForm(form5);
     console.log('Form 5 validity:', isValid);
+    if (isValid) {
+        alert('Form is valid!');
+    }
 });
 
 // ============================================================================
 // Console logging for educational purposes
 // ============================================================================
-console.log('%cHTML Form Validation APIs Explorer', 'font-size: 20px; font-weight: bold; color: #3b82f6;');
+console.log('%cHTML Form Validation with ValidityState & Error Summary', 'font-size: 20px; font-weight: bold; color: #3b82f6;');
 console.log('%cKey Concepts:', 'font-size: 16px; font-weight: bold; margin-top: 10px;');
 console.log('1. HTML5 Validation Attributes: required, pattern, min, max, minlength, maxlength, type');
 console.log('2. Constraint Validation API Methods:');
 console.log('   - checkValidity(): Returns boolean, no UI');
-console.log('   - reportValidity(): Returns boolean, shows native UI');
 console.log('   - setCustomValidity(message): Sets custom error message');
-console.log('3. ValidityState object: Properties like valueMissing, typeMismatch, patternMismatch, etc.');
-console.log('4. ValidationMessage: The current validation error message');
-console.log('\nTry interacting with the forms above to see these APIs in action!');
+console.log('   - validity: ValidityState object with error properties');
+console.log('3. ValidityState Properties: valueMissing, typeMismatch, patternMismatch, tooShort, tooLong, etc.');
+console.log('4. Custom Error Summary: Collect all errors and display at top of form');
+console.log('5. No Default Browser Tooltips: Using novalidate attribute to prevent native UI');
+console.log('\nTry interacting with the forms above to see ValidityState errors accumulated and displayed!');
