@@ -134,6 +134,42 @@ input.invalid:focus {
     margin-top: 5px;
 }
 
+/* Error Summary */
+.error-summary {
+    background-color: #fef2f2;
+    border: 2px solid var(--error-color);
+    border-radius: var(--border-radius);
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.error-summary h3 {
+    color: var(--error-color);
+    font-size: 1em;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.error-summary ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.error-summary li {
+    color: var(--error-color);
+    font-size: 0.875em;
+    padding: 4px 0;
+    display: flex;
+    align-items: flex-start;
+}
+
+.error-summary li::before {
+    content: "•";
+    margin-right: 8px;
+    font-weight: bold;
+}
+
 /* Validity State Display */
 .validity-state {
     display: none;
