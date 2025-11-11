@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Form Validation - Browser APIs Exploration</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>HTML Form Validation with Browser APIs</h1>
+        <p class="intro">Exploring different approaches to form validation using standard browser APIs</p>
+
+        <!-- Example 1: Basic HTML5 Validation Attributes -->
+        <section class="example">
+            <h2>1. HTML5 Validation Attributes</h2>
+            <p>Using built-in HTML5 attributes: <code>required</code>, <code>pattern</code>, <code>minlength</code>, <code>type</code>, etc.</p>
+
+            <form id="form1" class="validation-form" novalidate>
+                <div class="form-group">
+                    <label for="email1">Email (required):</label>
+                    <input type="email" id="email1" name="email" required>
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="username1">Username (3-15 characters, alphanumeric):</label>
+                    <input type="text" id="username1" name="username"
+                           required
+                           minlength="3"
+                           maxlength="15"
+                           pattern="[a-zA-Z0-9]+">
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="age1">Age (18-120):</label>
+                    <input type="number" id="age1" name="age"
+                           required
+                           min="18"
+                           max="120">
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="website1">Website (optional URL):</label>
+                    <input type="url" id="website1" name="website">
+                    <span class="error-message"></span>
+                </div>
+
+                <button type="submit">Submit Form 1</button>
+            </form>
+        </section>
+
+        <!-- Example 2: Constraint Validation API -->
+        <section class="example">
+            <h2>2. Constraint Validation API</h2>
+            <p>Using JavaScript methods: <code>checkValidity()</code>, <code>setCustomValidity()</code>, <code>validity</code> object</p>
+
+            <form id="form2" class="validation-form" novalidate>
+                <div class="form-group">
+                    <label for="email2">Email:</label>
+                    <input type="email" id="email2" name="email" required>
+                    <span class="error-message"></span>
+                    <div class="validity-state"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password2">Password (min 8 chars):</label>
+                    <input type="password" id="password2" name="password"
+                           required
+                           minlength="8">
+                    <span class="error-message"></span>
+                    <div class="validity-state"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword2">Confirm Password:</label>
+                    <input type="password" id="confirmPassword2" name="confirmPassword" required>
+                    <span class="error-message"></span>
+                    <div class="validity-state"></div>
+                </div>
+
+                <button type="submit">Submit Form 2</button>
+                <button type="button" id="checkValidityBtn">Check Validity State</button>
+            </form>
+        </section>
+
+        <!-- Example 3: Custom Validation Logic -->
+        <section class="example">
+            <h2>3. Custom Validation Logic</h2>
+            <p>Implementing custom validation rules with <code>setCustomValidity()</code></p>
+
+            <form id="form3" class="validation-form" novalidate>
+                <div class="form-group">
+                    <label for="username3">Username (no special chars except underscore):</label>
+                    <input type="text" id="username3" name="username" required>
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone3">Phone Number (US format):</label>
+                    <input type="tel" id="phone3" name="phone"
+                           placeholder="(123) 456-7890"
+                           required>
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="creditCard3">Credit Card (test validation):</label>
+                    <input type="text" id="creditCard3" name="creditCard"
+                           placeholder="1234 5678 9012 3456"
+                           required>
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="zipCode3">ZIP Code (US 5 or 9 digit):</label>
+                    <input type="text" id="zipCode3" name="zipCode"
+                           placeholder="12345 or 12345-6789"
+                           required>
+                    <span class="error-message"></span>
+                </div>
+
+                <button type="submit">Submit Form 3</button>
+            </form>
+        </section>
+
+        <!-- Example 4: Real-time Validation -->
+        <section class="example">
+            <h2>4. Real-time Validation</h2>
+            <p>Validating on input, blur, and submit events</p>
+
+            <form id="form4" class="validation-form" novalidate>
+                <div class="form-group">
+                    <label for="email4">Email (validated on blur):</label>
+                    <input type="email" id="email4" name="email" required>
+                    <span class="error-message"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password4">Password (validated on input):</label>
+                    <input type="password" id="password4" name="password" required>
+                    <span class="error-message"></span>
+                    <div class="password-strength"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="coupon4">Coupon Code (async validation):</label>
+                    <input type="text" id="coupon4" name="coupon">
+                    <span class="error-message"></span>
+                    <span class="validating-indicator">Validating...</span>
+                </div>
+
+                <button type="submit">Submit Form 4</button>
+            </form>
+        </section>
+
+        <!-- Example 5: reportValidity() Demo -->
+        <section class="example">
+            <h2>5. reportValidity() Method</h2>
+            <p>Using <code>reportValidity()</code> to show native browser validation messages</p>
+
+            <form id="form5" class="validation-form">
+                <div class="form-group">
+                    <label for="name5">Name:</label>
+                    <input type="text" id="name5" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email5">Email:</label>
+                    <input type="email" id="email5" name="email" required>
+                </div>
+
+                <button type="submit">Submit (Native Messages)</button>
+                <button type="button" id="reportValidityBtn">Check & Report Validity</button>
+            </form>
+        </section>
+
+        <!-- Validity State Reference -->
+        <section class="example reference">
+            <h2>ValidityState Properties Reference</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>valid</code></td>
+                        <td>True if the element meets all validation constraints</td>
+                    </tr>
+                    <tr>
+                        <td><code>valueMissing</code></td>
+                        <td>True if required attribute is set but no value</td>
+                    </tr>
+                    <tr>
+                        <td><code>typeMismatch</code></td>
+                        <td>True if value doesn't match the input type (email, url, etc.)</td>
+                    </tr>
+                    <tr>
+                        <td><code>patternMismatch</code></td>
+                        <td>True if value doesn't match the pattern attribute</td>
+                    </tr>
+                    <tr>
+                        <td><code>tooLong</code></td>
+                        <td>True if value exceeds maxlength</td>
+                    </tr>
+                    <tr>
+                        <td><code>tooShort</code></td>
+                        <td>True if value is less than minlength</td>
+                    </tr>
+                    <tr>
+                        <td><code>rangeUnderflow</code></td>
+                        <td>True if value is less than min</td>
+                    </tr>
+                    <tr>
+                        <td><code>rangeOverflow</code></td>
+                        <td>True if value exceeds max</td>
+                    </tr>
+                    <tr>
+                        <td><code>stepMismatch</code></td>
+                        <td>True if value doesn't fit the step rules</td>
+                    </tr>
+                    <tr>
+                        <td><code>badInput</code></td>
+                        <td>True if browser can't convert the input</td>
+                    </tr>
+                    <tr>
+                        <td><code>customError</code></td>
+                        <td>True if custom validity message is set</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <script src="validation.js"></script>
+</body>
+</html>
